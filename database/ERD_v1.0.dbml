@@ -1,0 +1,567 @@
+///////////////////////////////////////////////////////////
+// Student Success Platform (SSP)
+// Batch 1 - Foundation Tables
+///////////////////////////////////////////////////////////
+
+Table roles {
+  id uuid [pk]
+  role_name varchar(50) [unique, not null]
+  description text
+
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table users {
+  id uuid [pk]
+
+  role_id uuid [not null]
+
+  email varchar(255) [unique, not null]
+  password_hash text [not null]
+
+  is_active boolean [default: true]
+
+  last_login timestamp
+
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table departments {
+  id uuid [pk]
+
+  department_code varchar(10) [unique, not null]
+  department_name varchar(100) [not null]
+
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table programs {
+  id uuid [pk]
+
+  department_id uuid [not null]
+
+  program_name varchar(100) [not null]
+
+  degree varchar(50)
+
+  duration_years int
+
+  created_at timestamp
+  updated_at timestamp
+}
+
+Ref: users.role_id > roles.id
+
+Ref: programs.department_id > departments.id
+
+///////////////////////////////////////////////////////////
+// Batch 2 - Students & Faculty
+///////////////////////////////////////////////////////////
+
+Table students {
+  id uuid [pk]
+
+  user_id uuid [unique, not null]
+  program_id uuid [not null]
+  department_id uuid [not null]
+
+  roll_no varchar(20) [unique, not null]
+
+  full_name varchar(150) [not null]
+
+  gender varchar(20)
+
+  dob date
+
+  phone varchar(15)
+
+  division varchar(10)
+
+  admission_year int
+
+  graduation_year int
+
+  current_semester int
+
+  profile_photo text
+
+  is_active boolean [default: true]
+
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table faculty {
+
+  id uuid [pk]
+
+  user_id uuid [unique, not null]
+
+  department_id uuid [not null]
+
+  faculty_code varchar(20) [unique, not null]
+
+  full_name varchar(150) [not null]
+
+  designation varchar(100)
+
+  qualification varchar(150)
+
+  department_coordinator boolean [default: false]
+
+coordinator_department_id uuid
+
+  phone varchar(15)
+
+  joining_date date
+
+  profile_photo text
+
+  is_active boolean [default: true]
+
+  created_at timestamp
+  updated_at timestamp
+}
+
+Ref: students.user_id > users.id
+
+Ref: students.department_id > departments.id
+
+Ref: students.program_id > programs.id
+
+Ref: faculty.user_id > users.id
+
+Ref: faculty.department_id > departments.id
+
+Ref: faculty.coordinator_department_id > departments.id
+///////////////////////////////////////////////////////////
+// Batch 3 - Academic Module
+///////////////////////////////////////////////////////////
+
+Table academic_years {
+
+  id uuid [pk]
+
+  academic_year varchar(20) [unique, not null] // Example: 2025-2026
+
+  start_date date
+
+  end_date date
+
+  is_current boolean [default: false]
+
+  created_at timestamp
+
+  updated_at timestamp
+
+}
+
+Table semesters {
+
+  id uuid [pk]
+
+  academic_year_id uuid [not null]
+
+  semester_number int [not null] // 1 - 6
+
+  start_date date
+
+  end_date date
+
+  is_current boolean [default: false]
+
+  created_at timestamp
+
+  updated_at timestamp
+
+}
+
+Table subjects {
+
+  id uuid [pk]
+
+  department_id uuid [not null]
+
+  faculty_id uuid [not null]
+
+  semester_id uuid [not null]
+
+  subject_code varchar(20) [unique, not null]
+
+  subject_name varchar(150) [not null]
+
+  credits int
+
+  created_at timestamp
+
+  updated_at timestamp
+
+}
+
+Table semester_results {
+
+  id uuid [pk]
+
+  student_id uuid [not null]
+
+  semester_id uuid [not null]
+
+  sgpa decimal(3,2)
+
+  cgpa decimal(3,2)
+
+  result varchar(20)
+
+  published_at timestamp
+
+  created_at timestamp
+
+  updated_at timestamp
+
+}
+
+Table student_marks {
+
+  id uuid [pk]
+
+  student_id uuid [not null]
+
+  subject_id uuid [not null]
+
+  internal_marks decimal(5,2)
+
+  external_marks decimal(5,2)
+
+  total_marks decimal(5,2)
+
+  grade varchar(5)
+
+  result varchar(20)
+
+  created_at timestamp
+
+  updated_at timestamp
+
+}
+
+Table attendance {
+
+  id uuid [pk]
+
+  student_id uuid [not null]
+
+  subject_id uuid [not null]
+
+  attendance_percentage decimal(5,2)
+
+  last_synced timestamp
+
+  source varchar(50) // Attendance System
+
+  created_at timestamp
+
+  updated_at timestamp
+
+}
+
+Ref: semesters.academic_year_id > academic_years.id
+
+Ref: subjects.department_id > departments.id
+
+Ref: subjects.faculty_id > faculty.id
+
+Ref: subjects.semester_id > semesters.id
+
+Ref: semester_results.student_id > students.id
+
+Ref: semester_results.semester_id > semesters.id
+
+Ref: student_marks.student_id > students.id
+
+Ref: student_marks.subject_id > subjects.id
+
+Ref: attendance.student_id > students.id
+
+Ref: attendance.subject_id > subjects.id
+
+///////////////////////////////////////////////////////////
+// Batch 4 - Certificate Management
+///////////////////////////////////////////////////////////
+
+Table certificate_categories {
+
+  id uuid [pk]
+
+  category_name varchar(100) [unique, not null]
+
+  description text
+
+  created_at timestamp
+
+  updated_at timestamp
+
+}
+
+Table certificates {
+
+  id uuid [pk]
+
+  student_id uuid [not null]
+
+  category_id uuid [not null]
+
+  verified_by uuid
+
+  title varchar(255) [not null]
+
+  issuing_organization varchar(255)
+
+  issue_date date
+
+  expiry_date date
+
+  credential_id varchar(100)
+
+  credential_url text
+
+  certificate_file text
+
+  verification_status varchar(20) [default: 'Pending']
+
+  verification_remarks text
+
+  verified_at timestamp
+
+  uploaded_at timestamp
+
+  updated_at timestamp
+
+}
+
+Table certificate_verification_logs {
+
+  id uuid [pk]
+
+  certificate_id uuid [not null]
+
+  verified_by uuid [not null]
+
+  previous_status varchar(20)
+
+  new_status varchar(20)
+
+  remarks text
+
+  action_date timestamp
+
+}
+
+Ref: certificates.student_id > students.id
+
+Ref: certificates.category_id > certificate_categories.id
+
+Ref: certificates.verified_by > faculty.id
+
+Ref: certificate_verification_logs.certificate_id > certificates.id
+
+Ref: certificate_verification_logs.verified_by > faculty.id
+
+///////////////////////////////////////////////////////////
+// Placement Module
+///////////////////////////////////////////////////////////
+
+Table companies {
+
+  id uuid [pk]
+
+  company_name varchar(255) [unique, not null]
+
+  company_logo text
+
+  website text
+
+  industry varchar(100)
+
+  company_description text
+
+  hr_name varchar(150)
+
+  hr_email varchar(255)
+
+  hr_phone varchar(20)
+
+  created_at timestamp
+
+  updated_at timestamp
+}
+
+Table placement_drives {
+
+  id uuid [pk]
+
+  company_id uuid [not null]
+
+  drive_title varchar(255) [not null]
+
+  drive_type varchar(50) // Internship / Full-Time
+
+  campus_mode varchar(50) // On Campus / Off Campus / Hybrid
+
+  location varchar(255)
+
+  package decimal(10,2)
+
+  bond_details text
+
+  registration_deadline date
+
+  drive_date date
+
+  job_description text
+
+  status varchar(30)
+
+  created_at timestamp
+
+  updated_at timestamp
+}
+
+Table job_roles {
+
+  id uuid [pk]
+
+  placement_drive_id uuid [not null]
+
+  role_name varchar(150) [not null]
+
+  openings int
+
+  package decimal(10,2)
+
+  description text
+
+  created_at timestamp
+
+  updated_at timestamp
+}
+
+Table drive_eligibility {
+
+  id uuid [pk]
+
+  placement_drive_id uuid [not null]
+
+  minimum_cgpa decimal(3,2)
+
+  max_active_backlogs int
+
+  max_total_backlogs int
+
+  graduation_year int
+
+  department_id uuid
+
+  program_id uuid
+
+  additional_criteria text
+
+  created_at timestamp
+
+  updated_at timestamp
+}
+
+Table placement_statuses {
+
+  id uuid [pk]
+
+  status_name varchar(50) [unique, not null]
+
+  description text
+}
+
+Table student_applications {
+
+  id uuid [pk]
+
+  student_id uuid [not null]
+
+  placement_drive_id uuid [not null]
+
+  status_id uuid [not null]
+
+  resume_url text
+
+  applied_at timestamp
+
+  updated_at timestamp
+}
+
+Table application_status_history {
+
+  id uuid [pk]
+
+  application_id uuid [not null]
+
+  status_id uuid [not null]
+
+  updated_by uuid [not null]
+
+  remarks text
+
+  updated_at timestamp
+}
+
+Table interview_rounds {
+
+  id uuid [pk]
+
+  placement_drive_id uuid [not null]
+
+  round_number int
+
+  round_name varchar(100)
+
+  round_type varchar(100)
+
+  scheduled_date timestamp
+
+  result_status varchar(30)
+
+  remarks text
+
+  created_at timestamp
+
+  updated_at timestamp
+}
+
+///////////////////////////////////////////////////////////
+// Relationships
+///////////////////////////////////////////////////////////
+
+Ref: placement_drives.company_id > companies.id
+
+Ref: job_roles.placement_drive_id > placement_drives.id
+
+Ref: drive_eligibility.placement_drive_id > placement_drives.id
+
+Ref: drive_eligibility.department_id > departments.id
+
+Ref: drive_eligibility.program_id > programs.id
+
+Ref: student_applications.student_id > students.id
+
+Ref: student_applications.placement_drive_id > placement_drives.id
+
+Ref: student_applications.status_id > placement_statuses.id
+
+Ref: application_status_history.application_id > student_applications.id
+
+Ref: application_status_history.status_id > placement_statuses.id
+
+Ref: application_status_history.updated_by > faculty.id
+
+Ref: interview_rounds.placement_drive_id > placement_drives.id
+
