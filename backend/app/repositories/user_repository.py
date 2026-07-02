@@ -10,7 +10,6 @@ class UserRepository:
         db: Session,
         email: str,
     ) -> User | None:
-
         return (
             db.query(User)
             .filter(User.email == email)

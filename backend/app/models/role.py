@@ -19,3 +19,5 @@ class Role(BaseModel):
         "User",
         back_populates="role",
     )
+
+    

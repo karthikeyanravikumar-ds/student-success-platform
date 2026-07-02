@@ -32,6 +32,4 @@ def login(
             detail="Invalid email or password",
         )
 
-    return TokenResponse(
-        access_token=token,
-    )
+    return TokenResponse(access_token=token)
