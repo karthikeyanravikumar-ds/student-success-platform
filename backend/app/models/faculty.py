@@ -73,3 +73,8 @@ attendance = relationship(
     "Attendance",
     back_populates="faculty",
 )
+
+marks = relationship(
+    "Mark",
+    back_populates="faculty",
+)

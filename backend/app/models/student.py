@@ -108,3 +108,23 @@ attendance = relationship(
     "Attendance",
     back_populates="student",
 )
+
+marks = relationship(
+    "Mark",
+    back_populates="student",
+)
+
+marks = relationship(
+    "Mark",
+    back_populates="subject",
+)
+
+results = relationship(
+    "Result",
+    back_populates="student",
+)
+
+applications = relationship(
+    "Application",
+    back_populates="student",
+)
