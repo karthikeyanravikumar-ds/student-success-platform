@@ -1,0 +1,66 @@
+from uuid import UUID
+
+from sqlalchemy.orm import Session
+
+from app.models.student import Student
+
+
+class StudentRepository:
+
+    @staticmethod
+    def create(
+        db: Session,
+        data: dict,
+    ):
+        student = Student(**data)
+
+        db.add(student)
+        db.commit()
+        db.refresh(student)
+
+        return student
+
+    @staticmethod
+    def get_by_user_id(
+        db: Session,
+        user_id: UUID,
+    ):
+        return (
+            db.query(Student)
+            .filter(Student.user_id == user_id)
+            .first()
+        )
+
+    @staticmethod
+    def get_all(
+        db: Session,
+    ):
+        return db.query(Student).all()
+
+    @staticmethod
+    def get_by_id(
+        db: Session,
+        student_id: UUID,
+    ):
+        return (
+            db.query(Student)
+            .filter(Student.id == student_id)
+            .first()
+        )
+
+    @staticmethod
+    def update(
+        db: Session,
+        student: Student,
+    ):
+        db.commit()
+        db.refresh(student)
+        return student
+
+    @staticmethod
+    def delete(
+        db: Session,
+        student: Student,
+    ):
+        db.delete(student)
+        db.commit()
