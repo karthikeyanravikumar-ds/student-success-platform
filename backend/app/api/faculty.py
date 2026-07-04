@@ -1,8 +1,8 @@
 from uuid import UUID
-
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-
+from app.schemas.pagination import PaginatedResponse
 from app.auth.dependencies import require_roles
 from app.database.database import get_db
 from app.schemas.faculty import (
@@ -20,12 +20,26 @@ router = APIRouter(
 
 @router.get(
     "",
-    response_model=list[FacultyResponse],
+    response_model=PaginatedResponse[FacultyResponse],
 )
 def get_faculty(
+    page: int = 1,
+    size: int = 10,
+    search: Optional[str] = None,
+    department_id: Optional[UUID] = None,
+    is_active: Optional[bool] = None,
+    sort: str = "full_name",
     db: Session = Depends(get_db),
 ):
-    return FacultyService.get_all(db)
+    return FacultyService.get_all(
+        db=db,
+        page=page,
+        size=size,
+        search=search,
+        department_id=department_id,
+        is_active=is_active,
+        sort=sort,
+    )
 
 
 @router.get(

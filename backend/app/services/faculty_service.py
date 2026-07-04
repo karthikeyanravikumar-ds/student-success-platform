@@ -18,8 +18,24 @@ class FacultyService:
         )
 
     @staticmethod
-    def get_all(db):
-        return FacultyRepository.get_all(db)
+    def get_all(
+        db,
+        page: int = 1,
+        size: int = 10,
+        search: str | None = None,
+        department_id=None,
+        is_active: bool | None = None,
+        sort: str = "full_name",
+    ):
+        return FacultyRepository.get_all(
+            db=db,
+            page=page,
+            size=size,
+            search=search,
+            department_id=department_id,
+            is_active=is_active,
+            sort=sort,
+        )
 
     @staticmethod
     def get_by_id(
