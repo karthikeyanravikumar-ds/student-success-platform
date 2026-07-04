@@ -18,6 +18,7 @@ from app.api.roles import router as role_router
 from app.api.students import router as student_router
 from app.api.subjects import router as subject_router
 from app.api.users import router as users_router
+from app.api.reports import router as report_router
 
 app = FastAPI(
     title="Student Success Platform",
@@ -42,7 +43,7 @@ app.include_router(offer_router)
 app.include_router(role_router)
 app.include_router(dashboard_router)
 app.include_router(analytics_router)
-
+app.include_router(report_router)
 
 @app.get("/")
 def home():
