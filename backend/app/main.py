@@ -19,10 +19,23 @@ from app.api.students import router as student_router
 from app.api.subjects import router as subject_router
 from app.api.users import router as users_router
 from app.api.reports import router as report_router
+from app.exceptions.handlers import register_exception_handlers
+from app.core.logging_config import logger
+from app.middleware.cors import register_cors
+from app.api.uploads import router as upload_router
+from fastapi.staticfiles import StaticFiles
 
 app = FastAPI(
     title="Student Success Platform",
     version="1.0.0",
+)
+register_exception_handlers(app)
+register_cors(app)
+
+app.mount(
+    "/files",
+    StaticFiles(directory="uploads"),
+    name="files",
 )
 
 app.include_router(auth_router)
@@ -44,6 +57,7 @@ app.include_router(role_router)
 app.include_router(dashboard_router)
 app.include_router(analytics_router)
 app.include_router(report_router)
+app.include_router(upload_router)
 
 @app.get("/")
 def home():

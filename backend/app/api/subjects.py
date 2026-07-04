@@ -1,5 +1,5 @@
 from uuid import UUID
-
+from fastapi import File, UploadFile
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -111,3 +111,29 @@ def delete_subject(
         )
 
     return None
+
+@router.post(
+    "/{student_id}/resume",
+    summary="Upload Student Resume",
+)
+def upload_student_resume(
+    student_id: UUID,
+    file: UploadFile = File(...),
+    db=Depends(get_db),
+):
+    student = StudentService.upload_resume(
+        db,
+        student_id,
+        file,
+    )
+
+    if student is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Student not found",
+        )
+
+    return {
+        "message": "Resume uploaded successfully",
+        "student": student,
+    }

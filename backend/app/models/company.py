@@ -49,6 +49,10 @@ class Company(BaseModel):
         nullable=False,
     )
 
+    logo_path: Mapped[str | None] = mapped_column(
+    String(255),
+    nullable=True,
+)
     placement_drives = relationship(
         "PlacementDrive",
         back_populates="company",

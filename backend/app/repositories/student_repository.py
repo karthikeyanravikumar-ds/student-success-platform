@@ -47,6 +47,7 @@ class StudentRepository:
     ):
         query = db.query(Student)
 
+
         # Search
         query = apply_search(
             query=query,
@@ -101,6 +102,19 @@ class StudentRepository:
         db.commit()
         db.refresh(student)
         return student
+    
+    @staticmethod
+    def update_resume_path(
+    db: Session,
+    student: Student,
+    resume_path: str,
+    ):
+      student.resume_path = resume_path
+
+      db.commit()
+      db.refresh(student)
+
+      return student
 
     @staticmethod
     def delete(

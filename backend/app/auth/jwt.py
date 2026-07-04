@@ -4,7 +4,7 @@ from typing import Any
 from fastapi import HTTPException, status
 from jose import JWTError, jwt
 
-from app.config import settings
+from app.core.settings import settings
 
 
 def create_access_token(data: dict[str, Any]) -> str:

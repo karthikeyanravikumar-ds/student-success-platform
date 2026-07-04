@@ -2,6 +2,9 @@ from math import ceil
 from app.repositories.student_repository import StudentRepository
 from app.schemas.student import StudentCreate, StudentUpdate
 
+from fastapi import UploadFile
+from app.uploads.upload_service import UploadService
+from app.uploads.validators import validate_pdf
 
 class StudentService:
 
@@ -90,6 +93,33 @@ class StudentService:
             db,
             student,
         )
+    
+    @staticmethod
+    def upload_resume(
+        db,
+        student_id,
+        file: UploadFile,
+    ):
+        student = StudentRepository.get_by_id(
+            db,
+            student_id,
+        )
+
+        if student is None:
+            return None
+
+        validate_pdf(file)
+
+        resume_path = UploadService.save_student_resume(
+            str(student.id),
+            file,
+        )
+
+        return StudentRepository.update_resume_path(
+            db,
+            student,
+            resume_path,
+        )
 
     @staticmethod
     def delete(
@@ -110,3 +140,4 @@ class StudentService:
         )
 
         return True
+    

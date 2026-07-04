@@ -59,6 +59,11 @@ class Faculty(BaseModel):
         default=True,
     )
 
+    profile_photo_path: Mapped[str | None] = mapped_column(
+    String(255),
+    nullable=True,
+)
+
     user = relationship(
     "User",
     back_populates="faculty",

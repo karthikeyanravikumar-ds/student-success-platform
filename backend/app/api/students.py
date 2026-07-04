@@ -12,6 +12,7 @@ from app.schemas.student import (
     StudentUpdate,
 )
 from app.services.student_service import StudentService
+from fastapi import File, UploadFile
 
 router = APIRouter(
     prefix="/students",
@@ -149,3 +150,30 @@ def delete_student(
         )
 
     return None
+
+@router.post(
+    "/{student_id}/resume",
+    summary="Upload Student Resume",
+)
+def upload_student_resume(
+    student_id: UUID,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user=Depends(require_roles("Administrator")),
+):
+    student = StudentService.upload_resume(
+        db,
+        student_id,
+        file,
+    )
+
+    if student is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Student not found",
+        )
+
+    return {
+        "message": "Resume uploaded successfully",
+        "student": student,
+    }
