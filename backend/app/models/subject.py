@@ -54,7 +54,27 @@ class Subject(BaseModel):
         default=True,
     )
 
+    department = relationship(
+        "Department",
+        back_populates="subjects",
+    )
+
+    program = relationship(
+        "Program",
+        back_populates="subjects",
+    )
+
+    faculty = relationship(
+        "Faculty",
+        back_populates="subjects",
+    )
+
     attendance = relationship(
-    "Attendance",
-    back_populates="subject",
-)
+        "Attendance",
+        back_populates="subject",
+    )
+
+    marks = relationship(
+        "Mark",
+        back_populates="subject",
+    )

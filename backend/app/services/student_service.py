@@ -1,3 +1,4 @@
+from math import ceil
 from app.repositories.student_repository import StudentRepository
 from app.schemas.student import StudentCreate, StudentUpdate
 
@@ -27,8 +28,34 @@ class StudentService:
     @staticmethod
     def get_all(
         db,
+        page: int = 1,
+        size: int = 10,
+        search: str | None = None,
+        department_id=None,
+        program_id=None,
+        semester: int | None = None,
+        is_active: bool | None = None,
+        sort: str = "full_name",
     ):
-        return StudentRepository.get_all(db)
+        return StudentRepository.get_all(
+            db=db,
+            page=page,
+            size=size,
+            search=search,
+            department_id=department_id,
+            program_id=program_id,
+            semester=semester,
+            is_active=is_active,
+            sort=sort,
+        )
+
+        return {
+            "items": items,
+            "page": page,
+            "size": size,
+            "total": total,
+            "total_pages": ceil(total / size) if total else 0,
+        }
 
     @staticmethod
     def get_by_id(

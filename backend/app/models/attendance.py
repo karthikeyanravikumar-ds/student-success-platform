@@ -53,16 +53,16 @@ class Attendance(BaseModel):
     )
 
     student = relationship(
-    "Student",
-    back_populates="attendance",
-)
+        "Student",
+        back_populates="attendance",
+    )
 
-faculty = relationship(
-    "Faculty",
-    back_populates="attendance",
-)
+    faculty = relationship(
+        "Faculty",
+        back_populates="attendance",
+    )
 
-subject = relationship(
-    "Subject",
-    back_populates="attendance",
-)
+    subject = relationship(
+        "Subject",
+        back_populates="attendance",
+    )

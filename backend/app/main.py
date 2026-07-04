@@ -15,6 +15,8 @@ from app.api.placement_drives import router as placement_drive_router
 from app.api.applications import router as application_router
 from app.api.interviews import router as interview_router
 from app.api.offers import router as offer_router
+from app.api import roles
+from app.api import dashboard
 
 app = FastAPI(
     title="Student Success Platform",
@@ -36,6 +38,8 @@ app.include_router(placement_drive_router)
 app.include_router(application_router)
 app.include_router(interview_router)
 app.include_router(offer_router)
+app.include_router(roles.router)
+app.include_router(dashboard.router)
 
 @app.get("/")
 def home():

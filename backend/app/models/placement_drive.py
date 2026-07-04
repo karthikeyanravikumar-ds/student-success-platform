@@ -104,6 +104,6 @@ class PlacementDrive(BaseModel):
     )
 
     applications = relationship(
-    "Application",
-    back_populates="drive",
-)
+        "Application",
+        back_populates="drive",
+    )

@@ -1,6 +1,6 @@
 from sqlalchemy import String
-from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.models.base import BaseModel
 
 
@@ -24,21 +24,21 @@ class Department(BaseModel):
     )
 
     programs = relationship(
-    "Program",
-    back_populates="department",
-)
+        "Program",
+        back_populates="department",
+    )
 
-students = relationship(
-    "Student",
-    back_populates="department",
-)
+    students = relationship(
+        "Student",
+        back_populates="department",
+    )
 
-faculty = relationship(
-    "Faculty",
-    back_populates="department",
-)
+    faculty = relationship(
+        "Faculty",
+        back_populates="department",
+    )
 
-subjects = relationship(
-    "Subject",
-    back_populates="department",
-)
+    subjects = relationship(
+        "Subject",
+        back_populates="department",
+    )

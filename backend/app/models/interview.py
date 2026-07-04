@@ -70,7 +70,7 @@ class Interview(BaseModel):
     )
 
     offer = relationship(
-    "Offer",
-    back_populates="interview",
-    uselist=False,
-)
+        "Offer",
+        back_populates="interview",
+        uselist=False,
+    )

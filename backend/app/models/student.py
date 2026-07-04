@@ -4,7 +4,7 @@ from datetime import date
 from sqlalchemy import Boolean, Date, ForeignKey, Integer, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.orm import relationship
+
 from app.models.base import BaseModel
 
 
@@ -40,91 +40,60 @@ class Student(BaseModel):
         nullable=False,
     )
 
-    gender: Mapped[str | None] = mapped_column(
-        String(20),
-    )
+    gender: Mapped[str | None] = mapped_column(String(20))
 
     dob: Mapped[date | None] = mapped_column(Date)
 
-    phone: Mapped[str | None] = mapped_column(
-        String(20),
-    )
+    phone: Mapped[str | None] = mapped_column(String(20))
 
-    division: Mapped[str | None] = mapped_column(
-        String(10),
-    )
+    division: Mapped[str | None] = mapped_column(String(10))
 
-    admission_year: Mapped[int | None] = mapped_column(
-        Integer,
-    )
+    admission_year: Mapped[int | None] = mapped_column(Integer)
 
-    graduation_year: Mapped[int | None] = mapped_column(
-        Integer,
-    )
+    graduation_year: Mapped[int | None] = mapped_column(Integer)
 
-    current_semester: Mapped[int | None] = mapped_column(
-        Integer,
-    )
+    current_semester: Mapped[int | None] = mapped_column(Integer)
 
-    profile_photo: Mapped[str | None] = mapped_column(
-        Text,
-    )
+    profile_photo: Mapped[str | None] = mapped_column(Text)
 
     is_active: Mapped[bool] = mapped_column(
         Boolean,
         default=True,
     )
 
-    user = relationship("User")
-    department = relationship("Department")
-    program = relationship("Program")
+    # Relationships
+
+    user = relationship(
+    "User",
+    back_populates="student",
+)
 
     department = relationship(
-    "Department",
-    back_populates="students",
-)
+        "Department",
+        back_populates="students",
+    )
 
-program = relationship(
-    "Program",
-    back_populates="students",
-)
+    program = relationship(
+        "Program",
+        back_populates="students",
+    )
 
-department = relationship(
-    "Department",
-    back_populates="subjects",
-)
+    attendance = relationship(
+        "Attendance",
+        back_populates="student",
+    )
 
-program = relationship(
-    "Program",
-    back_populates="subjects",
-)
+    marks = relationship(
+        "Mark",
+        back_populates="student",
+    )
 
-faculty = relationship(
-    "Faculty",
-    back_populates="subjects",
-)
+    results = relationship(
+        "Result",
+        back_populates="student",
+    )
 
-attendance = relationship(
-    "Attendance",
-    back_populates="student",
-)
-
-marks = relationship(
-    "Mark",
-    back_populates="student",
-)
-
-marks = relationship(
-    "Mark",
-    back_populates="subject",
-)
-
-results = relationship(
-    "Result",
-    back_populates="student",
-)
-
-applications = relationship(
-    "Application",
-    back_populates="student",
-)
+    applications = relationship(
+        "Application",
+        back_populates="student",
+    )

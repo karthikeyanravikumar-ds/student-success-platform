@@ -1,9 +1,11 @@
 from uuid import UUID
-
 from sqlalchemy.orm import Session
-
 from app.models.student import Student
-
+from sqlalchemy import or_
+from app.utils.pagination import paginate
+from app.utils.search import apply_search
+from app.utils.filtering import apply_filters
+from app.utils.sorting import apply_sort
 
 class StudentRepository:
 
@@ -34,8 +36,51 @@ class StudentRepository:
     @staticmethod
     def get_all(
         db: Session,
+        page: int = 1,
+        size: int = 10,
+        search: str | None = None,
+        department_id: UUID | None = None,
+        program_id: UUID | None = None,
+        semester: int | None = None,
+        is_active: bool | None = None,
+        sort: str = "full_name",
     ):
-        return db.query(Student).all()
+        query = db.query(Student)
+
+        # Search
+        query = apply_search(
+            query=query,
+            model=Student,
+            search=search,
+            fields=[
+                "full_name",
+                "roll_no",
+            ],
+        )
+
+        # Filters
+        query = apply_filters(
+            query=query,
+            model=Student,
+            department_id=department_id,
+            program_id=program_id,
+            current_semester=semester,
+            is_active=is_active,
+        )
+
+        # Sorting
+        query = apply_sort(
+            query=query,
+            model=Student,
+            sort=sort,
+        )
+
+        # Pagination
+        return paginate(
+            query=query,
+            page=page,
+            size=size,
+        )
 
     @staticmethod
     def get_by_id(

@@ -59,6 +59,6 @@ class Application(BaseModel):
     )
 
     interviews = relationship(
-    "Interview",
-    back_populates="application",
-)
+        "Interview",
+        back_populates="application",
+    )

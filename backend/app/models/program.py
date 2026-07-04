@@ -2,8 +2,8 @@ from uuid import UUID
 
 from sqlalchemy import Boolean, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
-from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.models.base import BaseModel
 
 
@@ -37,16 +37,16 @@ class Program(BaseModel):
     )
 
     department = relationship(
-    "Department",
-    back_populates="programs",
-)
+        "Department",
+        back_populates="programs",
+    )
 
-students = relationship(
-    "Student",
-    back_populates="program",
-)
+    students = relationship(
+        "Student",
+        back_populates="program",
+    )
 
-subjects = relationship(
-    "Subject",
-    back_populates="program",
-)
+    subjects = relationship(
+        "Subject",
+        back_populates="program",
+    )

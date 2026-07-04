@@ -3,8 +3,8 @@ from uuid import UUID
 
 from sqlalchemy import Boolean, Date, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
-from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.models.base import BaseModel
 
 
@@ -59,22 +59,27 @@ class Faculty(BaseModel):
         default=True,
     )
 
+    user = relationship(
+    "User",
+    back_populates="faculty",
+)
+
     department = relationship(
-    "Department",
-    back_populates="faculty",
-)
+        "Department",
+        back_populates="faculty",
+    )
 
-subjects = relationship(
-    "Subject",
-    back_populates="faculty",
-)
+    subjects = relationship(
+        "Subject",
+        back_populates="faculty",
+    )
 
-attendance = relationship(
-    "Attendance",
-    back_populates="faculty",
-)
+    attendance = relationship(
+        "Attendance",
+        back_populates="faculty",
+    )
 
-marks = relationship(
-    "Mark",
-    back_populates="faculty",
-)
+    marks = relationship(
+        "Mark",
+        back_populates="faculty",
+    )
