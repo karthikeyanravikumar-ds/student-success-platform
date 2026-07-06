@@ -11,6 +11,10 @@ from app.schemas.company import (
     CompanyUpdate,
 )
 from app.services.company_service import CompanyService
+from fastapi import File, UploadFile
+from fastapi.responses import FileResponse
+
+from app.services.company_logo_service import CompanyLogoService
 
 router = APIRouter(
     prefix="/companies",
@@ -117,3 +121,142 @@ def delete_company(
         )
 
     return None
+
+@router.post(
+    "/{company_id}/logo",
+    summary="Upload Company Logo",
+)
+def upload_company_logo(
+    company_id: UUID,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user=Depends(
+        require_roles(
+            "Placement Officer",
+            "Administrator",
+        )
+    ),
+):
+    company = CompanyLogoService.upload(
+        db,
+        company_id,
+        file,
+    )
+
+    if company is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Company not found",
+        )
+
+    return {
+        "message": "Company logo uploaded successfully",
+        "company": company,
+    }
+
+@router.get(
+    "/{company_id}/logo",
+    summary="View Company Logo",
+)
+def view_company_logo(
+    company_id: UUID,
+    db: Session = Depends(get_db),
+    current_user=Depends(
+        require_roles(
+            "Student",
+            "Faculty",
+            "Placement Officer",
+            "Administrator",
+        )
+    ),
+):
+    path = CompanyLogoService.get(
+        db,
+        company_id,
+    )
+
+    if path is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Company not found",
+        )
+
+    if path is False:
+        raise HTTPException(
+            status_code=404,
+            detail="Logo not found",
+        )
+
+    return FileResponse(
+        path=str(path),
+        headers={
+            "Content-Disposition": "inline",
+        },
+    )
+
+@router.put(
+    "/{company_id}/logo",
+    summary="Replace Company Logo",
+)
+def replace_company_logo(
+    company_id: UUID,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user=Depends(
+        require_roles(
+            "Placement Officer",
+            "Administrator",
+        )
+    ),
+):
+    company = CompanyLogoService.replace(
+        db,
+        company_id,
+        file,
+    )
+
+    if company is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Company not found",
+        )
+
+    return {
+        "message": "Company logo replaced successfully",
+        "company": company,
+    }
+
+@router.delete(
+    "/{company_id}/logo",
+    summary="Delete Company Logo",
+)
+def delete_company_logo(
+    company_id: UUID,
+    db: Session = Depends(get_db),
+    current_user=Depends(
+        require_roles(
+            "Placement Officer",
+            "Administrator",
+        )
+    ),
+):
+    result = CompanyLogoService.delete(
+        db,
+        company_id,
+    )
+
+    if result is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Company not found",
+        )
+
+    if result is False:
+        raise HTTPException(
+            status_code=404,
+            detail="Logo not found",
+        )
+
+    return {
+        "message": "Company logo deleted successfully",
+    }

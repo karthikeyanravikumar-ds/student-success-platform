@@ -14,14 +14,14 @@ router = APIRouter(
 
 
 @router.post("/profile-photo")
-def upload_profile_photo(
+def upload_profile_photo_path(
     file: UploadFile = File(...),
 ):
     validate_image(file)
 
     filepath = UploadService.save_file(
         file=file,
-        folder="profile_photos",
+        folder="profile_photo_paths",
     )
 
     return {

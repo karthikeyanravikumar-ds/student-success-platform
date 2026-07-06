@@ -98,7 +98,7 @@ def upgrade() -> None:
     sa.Column('admission_year', sa.Integer(), nullable=True),
     sa.Column('graduation_year', sa.Integer(), nullable=True),
     sa.Column('current_semester', sa.Integer(), nullable=True),
-    sa.Column('profile_photo', sa.Text(), nullable=True),
+    sa.Column('profile_photo_path', sa.Text(), nullable=True),
     sa.Column('is_active', sa.Boolean(), nullable=False),
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),

@@ -47,7 +47,6 @@ class StudentRepository:
     ):
         query = db.query(Student)
 
-
         # Search
         query = apply_search(
             query=query,
@@ -82,6 +81,19 @@ class StudentRepository:
             page=page,
             size=size,
         )
+
+    @staticmethod
+    def update_profile_photo_path(
+        db: Session,
+        student: Student,
+        profile_photo_path: str,
+    ):
+        student.profile_photo_path = profile_photo_path
+
+        db.commit()
+        db.refresh(student)
+
+        return student
 
     @staticmethod
     def get_by_id(

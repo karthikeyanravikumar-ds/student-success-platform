@@ -24,6 +24,7 @@ from app.core.logging_config import logger
 from app.middleware.cors import register_cors
 from app.api.uploads import router as upload_router
 from fastapi.staticfiles import StaticFiles
+from app.api.student_certificates import router as student_certificate_router
 
 app = FastAPI(
     title="Student Success Platform",
@@ -58,6 +59,7 @@ app.include_router(dashboard_router)
 app.include_router(analytics_router)
 app.include_router(report_router)
 app.include_router(upload_router)
+app.include_router(student_certificate_router)
 
 @app.get("/")
 def home():

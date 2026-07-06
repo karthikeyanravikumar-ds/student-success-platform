@@ -54,8 +54,6 @@ class Student(BaseModel):
 
     current_semester: Mapped[int | None] = mapped_column(Integer)
 
-    profile_photo: Mapped[str | None] = mapped_column(Text)
-
     resume_path: Mapped[str | None] = mapped_column(
     String(255),
     nullable=True,
@@ -106,3 +104,9 @@ class Student(BaseModel):
         "Application",
         back_populates="student",
     )
+
+    certificates = relationship(
+    "StudentCertificate",
+    back_populates="student",
+    cascade="all, delete-orphan",
+)

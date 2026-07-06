@@ -11,6 +11,10 @@ from app.schemas.faculty import (
     FacultyUpdate,
 )
 from app.services.faculty_service import FacultyService
+from fastapi import File, UploadFile
+from fastapi.responses import FileResponse
+
+from app.services.faculty_profile_service import FacultyProfileService
 
 router = APIRouter(
     prefix="/faculty",
@@ -125,3 +129,136 @@ def delete_faculty(
         )
 
     return None
+@router.post(
+    "/{faculty_id}/profile-photo",
+    summary="Upload Faculty Profile Photo",
+)
+def upload_faculty_profile_photo(
+    faculty_id: UUID,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user=Depends(
+        require_roles(
+            "Administrator",
+        )
+    ),
+):
+    faculty = FacultyProfileService.upload(
+        db,
+        faculty_id,
+        file,
+    )
+
+    if faculty is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Faculty not found",
+        )
+
+    return {
+        "message": "Profile photo uploaded successfully",
+        "faculty": faculty,
+    }
+
+@router.get(
+    "/{faculty_id}/profile-photo",
+    summary="View Faculty Profile Photo",
+)
+def view_faculty_profile_photo(
+    faculty_id: UUID,
+    db: Session = Depends(get_db),
+    current_user=Depends(
+        require_roles(
+            "Faculty",
+            "Administrator",
+        )
+    ),
+):
+    path = FacultyProfileService.get(
+        db,
+        faculty_id,
+    )
+
+    if path is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Faculty not found",
+        )
+
+    if path is False:
+        raise HTTPException(
+            status_code=404,
+            detail="Profile photo not found",
+        )
+
+    return FileResponse(
+        path=str(path),
+        headers={
+            "Content-Disposition": "inline",
+        },
+    )
+
+@router.put(
+    "/{faculty_id}/profile-photo",
+    summary="Replace Faculty Profile Photo",
+)
+def replace_faculty_profile_photo(
+    faculty_id: UUID,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user=Depends(
+        require_roles(
+            "Administrator",
+        )
+    ),
+):
+    faculty = FacultyProfileService.replace(
+        db,
+        faculty_id,
+        file,
+    )
+
+    if faculty is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Faculty not found",
+        )
+
+    return {
+        "message": "Profile photo replaced successfully",
+        "faculty": faculty,
+    }
+
+@router.delete(
+    "/{faculty_id}/profile-photo",
+    summary="Delete Faculty Profile Photo",
+)
+def delete_faculty_profile_photo(
+    faculty_id: UUID,
+    db: Session = Depends(get_db),
+    current_user=Depends(
+        require_roles(
+            "Administrator",
+        )
+    ),
+):
+    result = FacultyProfileService.delete(
+        db,
+        faculty_id,
+    )
+
+    if result is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Faculty not found",
+        )
+
+    if result is False:
+        raise HTTPException(
+            status_code=404,
+            detail="Profile photo not found",
+        )
+
+    return {
+        "message": "Profile photo deleted successfully",
+    }

@@ -39,3 +39,16 @@ class CompanyRepository:
     def delete(db: Session, company: Company):
         db.delete(company)
         db.commit()
+
+    @staticmethod
+    def update_logo_path(
+        db: Session,
+        company: Company,
+        logo_path: str,
+    ):
+        company.logo_path = logo_path
+
+        db.commit()
+        db.refresh(company)
+
+        return company

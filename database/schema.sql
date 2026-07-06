@@ -51,7 +51,7 @@ CREATE TABLE "students" (
   "admission_year" int,
   "graduation_year" int,
   "current_semester" int,
-  "profile_photo" text,
+  "profile_photo_path" text,
   "is_active" boolean DEFAULT true,
   "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   "updated_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -69,7 +69,7 @@ CREATE TABLE "faculty" (
   "coordinator_department_id" uuid,
   "phone" varchar(15),
   "joining_date" date,
-  "profile_photo" text,
+  "profile_photo_path" text,
   "is_active" boolean DEFAULT true,
   "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   "updated_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
