@@ -1,11 +1,11 @@
-from uuid import UUID
-
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
+
+from io import BytesIO
 
 from app.auth.dependencies import require_roles
 from app.database.database import get_db
-from app.schemas.report import TranscriptResponse
 from app.services.report_service import ReportService
 
 router = APIRouter(
@@ -14,31 +14,29 @@ router = APIRouter(
 )
 
 
-@router.get(
-    "/student/{student_id}/transcript",
-    response_model=TranscriptResponse,
-)
-def student_transcript(
-    student_id: UUID,
+@router.get("/transcript/{student_id}")
+def generate_transcript(
+    student_id: str,
     db: Session = Depends(get_db),
     current_user=Depends(
         require_roles(
             "Administrator",
             "Faculty",
+            "Placement Officer",
             "Student",
         )
     ),
 ):
-
-    report = ReportService.get_student_transcript(
+    pdf = ReportService.generate_transcript(
         db,
         student_id,
     )
 
-    if report is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Student not found",
-        )
-
-    return report
+    return StreamingResponse(
+        BytesIO(pdf),
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition":
+            f'attachment; filename="transcript_{student_id}.pdf"'
+        },
+    )
