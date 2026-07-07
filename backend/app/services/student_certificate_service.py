@@ -3,13 +3,12 @@ from pathlib import Path
 
 from fastapi import UploadFile
 
-from app.repositories.student_repository import StudentRepository
 from app.repositories.student_certificate_repository import (
     StudentCertificateRepository,
 )
 from app.services.document_service import DocumentService
 from app.uploads.validators import validate_pdf
-
+from app.notifications.notification_manager import NotificationManager
 
 class StudentCertificateService:
 
@@ -124,10 +123,18 @@ class StudentCertificateService:
         certificate.verified_at = datetime.now()
         certificate.verification_remarks = remarks
 
-        return StudentCertificateRepository.update(
+        certificate = StudentCertificateRepository.update(
             db,
             certificate,
         )
+
+        NotificationManager.certificate_verified(
+    db=db,
+    user_id=certificate.student.user_id,
+    certificate_id=certificate.id,
+)
+
+        return certificate
 
     @staticmethod
     def reject(
@@ -149,10 +156,19 @@ class StudentCertificateService:
         certificate.verified_at = datetime.now()
         certificate.verification_remarks = remarks
 
-        return StudentCertificateRepository.update(
+        certificate = StudentCertificateRepository.update(
             db,
             certificate,
         )
+
+        NotificationManager.certificate_rejected(
+    db=db,
+    user_id=certificate.student.user_id,
+    certificate_id=certificate.id,
+    remarks=remarks,
+)
+
+        return certificate
     
     @staticmethod
     def get_pending(db):

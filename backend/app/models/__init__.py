@@ -15,3 +15,4 @@ from app.models.application import Application
 from app.models.interview import Interview
 from app.models.offer import Offer
 from app.models.student_certificate import StudentCertificate
+from app.models.notification import Notification

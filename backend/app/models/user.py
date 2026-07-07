@@ -60,3 +60,8 @@ class User(BaseModel):
     "StudentCertificate",
     foreign_keys="StudentCertificate.verified_by",
 )
+    notifications = relationship(
+    "Notification",
+    back_populates="user",
+    cascade="all, delete-orphan",
+)
