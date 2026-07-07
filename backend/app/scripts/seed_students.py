@@ -1,4 +1,5 @@
-from datetime import date
+import csv
+from pathlib import Path
 
 from sqlalchemy.orm import Session
 
@@ -10,24 +11,36 @@ from app.models.role import Role
 from app.models.student import Student
 from app.models.user import User
 
-
-STUDENTS = [
-    ("25315B2001", "Aarav Sharma"),
-    ("25315B3002", "Priya Patel"),
-    ("25315B3003", "Rohit Iyer"),
-    ("25315B3004", "Sneha Nair"),
-    ("25315B3005", "Aditya Mehta"),
-    ("25315B3006", "Kavya Iyer"),
-    ("25315B3007", "Rahul Verma"),
-    ("25315B3008", "Ananya Rao"),
-    ("25315B3009", "Arjun Kumar"),
-    ("25315B3010", "Neha Singh"),
-]
+CSV_FILE = Path("app/seed_data/students_dataset_draft_1.csv")
 
 DEFAULT_PASSWORD = "Student@123"
+DEFAULT_ADMISSION_YEAR = 2024
+DEFAULT_GRADUATION_YEAR = 2027
+
+
+def get_semester(year: str) -> int:
+    year = (year or "").strip().upper()
+
+    mapping = {
+        "FY": 1,
+        "SY": 3,
+        "TY": 5,
+    }
+
+    return mapping.get(year, 1)
+
+
+def clean_phone(phone: str) -> str:
+    """
+    Converts:
+        9876543210.0 -> 9876543210
+        +91-9876543210 -> 919876543210
+    """
+    return "".join(filter(str.isdigit, phone or ""))
 
 
 def seed_students():
+
     db: Session = SessionLocal()
 
     try:
@@ -44,7 +57,9 @@ def seed_students():
 
         department = (
             db.query(Department)
-            .filter(Department.department_code == "315")
+            .filter(
+                Department.department_code == "315"
+            )
             .first()
         )
 
@@ -54,7 +69,9 @@ def seed_students():
 
         program = (
             db.query(Program)
-            .filter(Program.program_code == "BSDS")
+            .filter(
+                Program.program_code == "BSDS"
+            )
             .first()
         )
 
@@ -63,63 +80,164 @@ def seed_students():
             return
 
         created = 0
+        skipped = 0
 
-        for roll_no, full_name in STUDENTS:
+        with CSV_FILE.open(
+            mode="r",
+            encoding="utf-8-sig",
+            newline="",
+        ) as csvfile:
 
-            email = f"{roll_no.lower()}@vsit.edu.in"
+            reader = csv.DictReader(csvfile)
+            print("Reader fieldnames:", reader.fieldnames)
+            print("CSV exists:", CSV_FILE.exists())
+            print("CSV path:", CSV_FILE.resolve())
 
-            user = (
-                db.query(User)
-                .filter(User.email == email)
-                .first()
-            )
+            # Debug: show first line of the file
+            csvfile.seek(0)
+            print("First line:", repr(csvfile.readline()))
+            print("Raw fieldnames:", reader.fieldnames)
+            print("Fieldnames type:", type(reader.fieldnames))
 
-            if user is None:
+            if reader.fieldnames is None:
+                print("❌ CSV has no headers.")
+                return
 
-                user = User(
-                    role_id=role.id,
-                    email=email,
-                    password_hash=hash_password(DEFAULT_PASSWORD),
+            reader.fieldnames = [
+                str(field).strip()
+                for field in reader.fieldnames
+            ]
+
+            print("Processed fieldnames:", reader.fieldnames)
+
+            for index, row in enumerate(reader, start=1):
+
+                cleaned_row = {}
+
+                for key, value in row.items():
+
+                    key = str(key).strip() if key else ""
+
+                    if isinstance(value, list):
+                        value = ",".join(str(v).strip() for v in value)
+                    else:
+                        value = str(value).strip() if value else ""
+
+                    cleaned_row[key] = value
+
+                row = cleaned_row
+
+                print(f"Processing row {index}...")
+
+                roll_no = row.get("ROLL NO", "")
+                full_name = row.get("Name", "")
+                email = row.get("Email", "").lower()
+                phone = clean_phone(row.get("Phone", ""))
+                semester = get_semester(row.get("Year", ""))
+                division = row.get("Division", "A") or "A"
+
+                # ---------------------------
+                # Validation
+                # ---------------------------
+
+                if not roll_no:
+                    print(f"⚠️ Row {index}: Roll number missing.")
+                    skipped += 1
+                    continue
+
+                if not email:
+                    print(f"⚠️ {roll_no}: Email missing.")
+                    skipped += 1
+                    continue
+
+                if not email.endswith("@vsit.edu.in"):
+                    print(f"⚠️ {roll_no}: Invalid VSIT email -> {email}")
+                    skipped += 1
+                    continue
+
+                # ---------------------------
+                # User
+                # ---------------------------
+
+                user = (
+                    db.query(User)
+                    .filter(User.email == email)
+                    .first()
+                )
+
+                if user:
+
+                    if user.role_id != role.id:
+                        print(
+                            f"⚠️ {email} already exists with another role."
+                        )
+                        skipped += 1
+                        continue
+
+                else:
+
+                    user = User(
+                        role_id=role.id,
+                        email=email,
+                        password_hash=hash_password(
+                            DEFAULT_PASSWORD
+                        ),
+                        is_active=True,
+                    )
+
+                    db.add(user)
+                    db.flush()
+
+                # ---------------------------
+                # Student
+                # ---------------------------
+
+                student = (
+                    db.query(Student)
+                    .filter(Student.roll_no == roll_no)
+                    .first()
+                )
+
+                if student:
+                    print(f"⚠️ Student {roll_no} already exists.")
+                    skipped += 1
+                    continue
+
+                student = Student(
+                    user_id=user.id,
+                    department_id=department.id,
+                    program_id=program.id,
+                    roll_no=roll_no,
+                    full_name=full_name,
+                    gender=None,
+                    dob=None,
+                    phone=phone,
+                    division=division,
+                    admission_year=DEFAULT_ADMISSION_YEAR,
+                    graduation_year=DEFAULT_GRADUATION_YEAR,
+                    current_semester=semester,
                     is_active=True,
                 )
 
-                db.add(user)
-                db.commit()
-                db.refresh(user)
-
-            student = (
-                db.query(Student)
-                .filter(Student.roll_no == roll_no)
-                .first()
-            )
-
-            if student:
-                continue
-
-            student = Student(
-                user_id=user.id,
-                department_id=department.id,
-                program_id=program.id,
-                roll_no=roll_no,
-                full_name=full_name,
-                gender=None,
-                dob=None,
-                phone=None,
-                division="B",
-                admission_year=2025,
-                graduation_year=2028,
-                current_semester=1,
-                is_active=True,
-            )
-
-            db.add(student)
-            created += 1
+                db.add(student)
+                created += 1
 
         db.commit()
 
-        print(f"✅ {created} students seeded successfully.")
+        print("\n========== Seed Summary ==========")
+        print(f"✅ Students Created : {created}")
+        print(f"⏭️ Students Skipped : {skipped}")
+        print("==================================")
+
+    except Exception as e:
+
+        db.rollback()
+
+        print(f"\n❌ Error occurred: {e}")
+        raise
 
     finally:
+
         db.close()
 
 
