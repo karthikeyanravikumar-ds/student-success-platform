@@ -12,7 +12,13 @@ from app.schemas.student import (
     StudentUpdate,
 )
 from app.services.student_service import StudentService
+from app.services.student_resume_service import StudentResumeService
+from app.services.student_profile_service import StudentProfileService
+
+
+
 from fastapi import File, UploadFile
+from fastapi.responses import FileResponse
 
 router = APIRouter(
     prefix="/students",
@@ -161,7 +167,7 @@ def upload_student_resume(
     db: Session = Depends(get_db),
     current_user=Depends(require_roles("Administrator")),
 ):
-    student = StudentService.upload_resume(
+    student = StudentResumeService.upload(
         db,
         student_id,
         file,
@@ -176,4 +182,280 @@ def upload_student_resume(
     return {
         "message": "Resume uploaded successfully",
         "student": student,
+    }
+
+@router.get(
+    "/{student_id}/resume",
+    summary="View Student Resume",
+)
+def view_student_resume(
+    student_id: UUID,
+    db: Session = Depends(get_db),
+    current_user=Depends(
+        require_roles(
+            "Student",
+            "Faculty",
+            "Placement Officer",
+            "Administrator",
+        )
+    ),
+):
+    path = StudentResumeService.get(
+        db,
+        student_id,
+    )
+
+    if path is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Student not found",
+        )
+
+    if path is False:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Resume not found",
+        )
+
+    return FileResponse(
+        path=path,
+        media_type="application/pdf",
+        filename=f"{student_id}_resume.pdf",
+        headers={
+            "Content-Disposition": "inline"
+        },
+    )
+@router.get(
+    "/{student_id}/resume/download",
+    summary="Download Student Resume",
+)
+def download_student_resume(
+    student_id: UUID,
+    db: Session = Depends(get_db),
+    current_user=Depends(
+        require_roles(
+            "Student",
+            "Faculty",
+            "Placement Officer",
+            "Administrator",
+        )
+    ),
+):
+    path = StudentResumeService.download(
+        db,
+        student_id,
+    )
+
+    if path is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Student not found",
+        )
+
+    if path is False:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Resume not found",
+        )
+
+    student = StudentService.get_by_id(
+        db,
+        student_id,
+    )
+
+    return FileResponse(
+        path=path,
+        media_type="application/pdf",
+        filename=f"{student.roll_no}_Resume.pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="{student.roll_no}_Resume.pdf"'
+        },
+    )
+@router.put(
+    "/{student_id}/resume",
+    summary="Replace Student Resume",
+)
+def replace_student_resume(
+    student_id: UUID,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user=Depends(
+        require_roles(
+            "Administrator",
+        )
+    ),
+):
+    student = StudentResumeService.replace_resume(
+        db,
+        student_id,
+        file,
+    )
+
+    if student is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Student not found",
+        )
+
+    return {
+        "message": "Resume replaced successfully",
+        "student": student,
+    }
+
+@router.delete(
+    "/{student_id}/resume",
+    summary="Delete Student Resume",
+)
+def delete_student_resume(
+    student_id: UUID,
+    db: Session = Depends(get_db),
+    current_user=Depends(
+        require_roles(
+            "Administrator",
+        )
+    ),
+):
+    result = StudentResumeService.delete_resume(
+        db,
+        student_id,
+    )
+
+    if result is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Student not found",
+        )
+
+    if result is False:
+        raise HTTPException(
+            status_code=404,
+            detail="Resume not found",
+        )
+
+    return {
+        "message": "Resume deleted successfully",
+    }
+
+@router.post(
+    "/{student_id}/profile-photo",
+    summary="Upload Student Profile Photo",
+)
+def upload_student_profile_photo(
+    student_id: UUID,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user=Depends(require_roles("Administrator")),
+):
+    student = StudentProfileService.upload(
+        db,
+        student_id,
+        file,
+    )
+
+    if student is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Student not found",
+        )
+
+    return {
+        "message": "Profile photo uploaded successfully",
+        "student": student,
+    }
+
+@router.get(
+    "/{student_id}/profile-photo",
+    summary="View Student Profile Photo",
+)
+def view_student_profile_photo(
+    student_id: UUID,
+    db: Session = Depends(get_db),
+    current_user=Depends(
+        require_roles(
+            "Student",
+            "Faculty",
+            "Placement Officer",
+            "Administrator",
+        )
+    ),
+):
+    path = StudentProfileService.get(
+        db,
+        student_id,
+    )
+
+    if path is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Student not found",
+        )
+
+    if path is False:
+        raise HTTPException(
+            status_code=404,
+            detail="Profile photo not found",
+        )
+
+    return FileResponse(
+        path=str(path),
+        headers={
+            "Content-Disposition": "inline",
+        },
+    )
+
+@router.put(
+    "/{student_id}/profile-photo",
+    summary="Replace Student Profile Photo",
+)
+def replace_student_profile_photo(
+    student_id: UUID,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user=Depends(require_roles("Administrator")),
+):
+    student = StudentProfileService.replace(
+        db,
+        student_id,
+        file,
+    )
+
+    if student is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Student not found",
+        )
+
+    return {
+        "message": "Profile photo replaced successfully",
+        "student": student,
+    }
+
+@router.delete(
+    "/{student_id}/profile-photo",
+    summary="Delete Student Profile Photo",
+)
+def delete_student_profile_photo(
+    student_id: UUID,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_roles("Administrator")),
+):
+    result = StudentProfileService.delete(
+        db,
+        student_id,
+    )
+
+    if result is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Student not found",
+        )
+
+    if result is False:
+        raise HTTPException(
+            status_code=404,
+            detail="Profile photo not found",
+        )
+
+    return {
+        "message": "Profile photo deleted successfully",
     }

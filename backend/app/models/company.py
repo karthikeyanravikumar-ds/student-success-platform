@@ -57,3 +57,4 @@ class Company(BaseModel):
         "PlacementDrive",
         back_populates="company",
     )
+    

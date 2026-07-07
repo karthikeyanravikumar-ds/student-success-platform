@@ -1,4 +1,5 @@
 from math import ceil
+from pathlib import Path
 from app.repositories.student_repository import StudentRepository
 from app.schemas.student import StudentCreate, StudentUpdate
 
@@ -52,14 +53,6 @@ class StudentService:
             sort=sort,
         )
 
-        return {
-            "items": items,
-            "page": page,
-            "size": size,
-            "total": total,
-            "total_pages": ceil(total / size) if total else 0,
-        }
-
     @staticmethod
     def get_by_id(
         db,
@@ -93,33 +86,6 @@ class StudentService:
             db,
             student,
         )
-    
-    @staticmethod
-    def upload_resume(
-        db,
-        student_id,
-        file: UploadFile,
-    ):
-        student = StudentRepository.get_by_id(
-            db,
-            student_id,
-        )
-
-        if student is None:
-            return None
-
-        validate_pdf(file)
-
-        resume_path = UploadService.save_student_resume(
-            str(student.id),
-            file,
-        )
-
-        return StudentRepository.update_resume_path(
-            db,
-            student,
-            resume_path,
-        )
 
     @staticmethod
     def delete(
@@ -140,4 +106,5 @@ class StudentService:
         )
 
         return True
+    
     

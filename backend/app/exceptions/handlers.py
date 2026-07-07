@@ -2,46 +2,24 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import SQLAlchemyError
-
 from app.exceptions.errors import AppException
+import traceback
 
 
 def register_exception_handlers(app: FastAPI):
 
     @app.exception_handler(AppException)
-    async def app_exception_handler(
-        request: Request,
-        exc: AppException,
-    ):
-        return JSONResponse(
-            status_code=exc.status_code,
-            content={
-                "success": False,
-                "status": exc.status_code,
-                "message": exc.message,
-            },
-        )
+    async def app_exception_handler(request: Request, exc: AppException):
+        ...
 
     @app.exception_handler(RequestValidationError)
-    async def validation_exception_handler(
-        request: Request,
-        exc: RequestValidationError,
-    ):
-        return JSONResponse(
-            status_code=422,
-            content={
-                "success": False,
-                "status": 422,
-                "message": "Validation failed",
-                "errors": exc.errors(),
-            },
-        )
+    async def validation_exception_handler(request: Request, exc: RequestValidationError):
+        ...
 
     @app.exception_handler(SQLAlchemyError)
-    async def database_exception_handler(
-        request: Request,
-        exc: SQLAlchemyError,
-    ):
+    async def database_exception_handler(request: Request, exc: SQLAlchemyError):
+        traceback.print_exc()     # <-- ONLY ADD THIS LINE
+
         return JSONResponse(
             status_code=500,
             content={
@@ -52,10 +30,9 @@ def register_exception_handlers(app: FastAPI):
         )
 
     @app.exception_handler(Exception)
-    async def global_exception_handler(
-        request: Request,
-        exc: Exception,
-    ):
+    async def global_exception_handler(request: Request, exc: Exception):
+        traceback.print_exc()     # <-- ONLY ADD THIS LINE
+
         return JSONResponse(
             status_code=500,
             content={

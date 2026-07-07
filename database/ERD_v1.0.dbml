@@ -86,7 +86,7 @@ Table students {
 
   current_semester int
 
-  profile_photo text
+  profile_photo_path text
 
   is_active boolean [default: true]
 
@@ -118,7 +118,7 @@ coordinator_department_id uuid
 
   joining_date date
 
-  profile_photo text
+  profile_photo_path text
 
   is_active boolean [default: true]
 

@@ -94,3 +94,16 @@ class FacultyRepository:
     ):
         db.delete(faculty)
         db.commit()
+
+    @staticmethod
+    def update_profile_photo_path(
+        db: Session,
+        faculty: Faculty,
+        profile_photo_path: str,
+    ):
+        faculty.profile_photo_path = profile_photo_path
+
+        db.commit()
+        db.refresh(faculty)
+
+        return faculty

@@ -26,12 +26,45 @@ class PlacementDashboardResponse(BaseModel):
     highest_package: float
     average_package: float
 
+#
+
+class StudentStats(BaseModel):
+    total: int
+    active: int
+    inactive: int
+
+
+class FacultyStats(BaseModel):
+    total: int
+
+
+class AcademicStats(BaseModel):
+    departments: int
+    programs: int
+    subjects: int
+
+
+class PlacementStats(BaseModel):
+    companies: int
+    active_drives: int
+    applications: int
+    offers: int
+
+
+class CertificateStats(BaseModel):
+    pending: int
+    verified: int
+    rejected: int
+
+
+class NotificationStats(BaseModel):
+    sent: int
+
 
 class AdminDashboardResponse(BaseModel):
-    total_students: int
-    total_faculty: int
-    total_departments: int
-    total_programs: int
-    total_users: int
-    attendance_percentage: float
-    placement_percentage: float
+    students: StudentStats
+    faculty: FacultyStats
+    academic: AcademicStats
+    placement: PlacementStats
+    certificates: CertificateStats
+    notifications: NotificationStats

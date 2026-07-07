@@ -55,3 +55,13 @@ class User(BaseModel):
         back_populates="user",
         uselist=False,
     )
+
+    verified_certificates = relationship(
+    "StudentCertificate",
+    foreign_keys="StudentCertificate.verified_by",
+)
+    notifications = relationship(
+    "Notification",
+    back_populates="user",
+    cascade="all, delete-orphan",
+)

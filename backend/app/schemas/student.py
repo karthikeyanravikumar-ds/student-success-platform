@@ -15,7 +15,7 @@ class StudentProfile(BaseModel):
     admission_year: int | None = None
     graduation_year: int | None = None
     current_semester: int | None = None
-    profile_photo: str | None = None
+    profile_photo_path: str | None = None
     is_active: bool
 
     class Config:
