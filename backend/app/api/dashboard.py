@@ -47,7 +47,10 @@ def student_dashboard(
     db: Session = Depends(get_db),
     current_user=Depends(require_roles("Student")),
 ):
-    return DashboardService.get_student_dashboard(db)
+    return DashboardService.get_student_dashboard(
+        db,
+        current_user,
+    )
 
 
 @router.get(

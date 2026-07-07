@@ -27,8 +27,10 @@ from fastapi.staticfiles import StaticFiles
 from app.api.student_certificates import router as student_certificate_router
 from app.api.notifications import router as notification_router
 
+
 app = FastAPI(
     title="Student Success Platform",
+    description="VSIT Student Success & Placement Management System API",
     version="1.0.0",
 )
 register_exception_handlers(app)
@@ -63,8 +65,14 @@ app.include_router(upload_router)
 app.include_router(student_certificate_router)
 app.include_router(notification_router)
 
-@app.get("/")
-def home():
+
+@app.get(
+    "/",
+    tags=["System"],
+)
+def health_check():
     return {
-        "message": "Student Success Platform Backend Running"
+        "status": "healthy",
+        "application": "Student Success Platform",
+        "version": "1.0.0",
     }

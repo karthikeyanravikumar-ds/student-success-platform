@@ -151,20 +151,52 @@ class DashboardService:
         }
 
     @staticmethod
-    def get_student_dashboard(db: Session):
-
-        cgpa = db.query(func.avg(Result.cgpa)).scalar() or 0
-
-        current_semester = (
-            db.query(func.max(Result.semester)).scalar() or 1
+    def get_student_dashboard(
+        db: Session,
+        current_user,
+    ):
+        student = (
+            db.query(Student)
+            .filter(Student.user_id == current_user.id)
+            .first()
         )
 
-        total_attendance = db.query(Attendance).count()
+        if student is None:
+            return {
+                "attendance_percentage": 0,
+                "current_cgpa": 0,
+                "current_semester": 0,
+                "applied_drives": 0,
+                "interviews": 0,
+                "offers": 0,
+            }
+
+        latest_result = (
+            db.query(Result)
+            .filter(Result.student_id == student.id)
+            .order_by(Result.semester.desc())
+            .first()
+        )
+
+        current_cgpa = (
+            latest_result.cgpa
+            if latest_result
+            else 0
+        )
+
+        total_attendance = (
+            db.query(Attendance)
+            .filter(
+                Attendance.student_id == student.id
+            )
+            .count()
+        )
 
         present_attendance = (
             db.query(Attendance)
             .filter(
-                Attendance.status == AttendanceStatus.PRESENT
+                Attendance.student_id == student.id,
+                Attendance.status == AttendanceStatus.PRESENT,
             )
             .count()
         )
@@ -175,11 +207,53 @@ class DashboardService:
             else 0
         )
 
+        applied_drives = (
+            db.query(Application)
+            .filter(
+                Application.student_id == student.id
+            )
+            .count()
+        )
+
+        interviews = (
+            db.query(Interview)
+            .join(
+                Application,
+                Interview.application_id == Application.id,
+            )
+            .filter(
+                Application.student_id == student.id
+            )
+            .count()
+        )
+
+        offers = (
+    db.query(Offer)
+    .join(
+        Interview,
+        Offer.interview_id == Interview.id,
+    )
+    .join(
+        Application,
+        Interview.application_id == Application.id,
+    )
+    .filter(
+        Application.student_id == student.id,
+    )
+    .count()
+)
+
         return {
-            "attendance_percentage": round(attendance_percentage, 2),
-            "current_cgpa": round(cgpa, 2),
-            "current_semester": current_semester,
-            "applied_drives": db.query(Application).count(),
-            "interviews": db.query(Interview).count(),
-            "offers": db.query(Offer).count(),
+            "attendance_percentage": round(
+                attendance_percentage,
+                2,
+            ),
+            "current_cgpa": round(
+                current_cgpa,
+                2,
+            ),
+            "current_semester": student.current_semester,
+            "applied_drives": applied_drives,
+            "interviews": interviews,
+            "offers": offers,
         }
