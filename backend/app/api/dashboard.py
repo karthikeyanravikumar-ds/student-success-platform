@@ -36,7 +36,10 @@ def faculty_dashboard(
     db: Session = Depends(get_db),
     current_user=Depends(require_roles("Faculty")),
 ):
-    return DashboardService.get_faculty_dashboard(db)
+    return DashboardService.get_faculty_dashboard(
+    db,
+    current_user,
+)
 
 
 @router.get(
@@ -62,3 +65,4 @@ def placement_dashboard(
     current_user=Depends(require_roles("Placement Officer")),
 ):
     return DashboardService.get_placement_dashboard(db)
+

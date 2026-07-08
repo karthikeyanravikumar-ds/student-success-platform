@@ -1,30 +1,128 @@
 from pydantic import BaseModel
 
 
-class StudentDashboardResponse(BaseModel):
-    attendance_percentage: float
+# ---------- Student Dashboard ----------
+
+class StudentProfileCard(BaseModel):
+    full_name: str
+    roll_no: str
+    department: str
+    program: str
+    semester: int
+    division: str
+
+
+class AcademicCard(BaseModel):
     current_cgpa: float
     current_semester: int
+    latest_sgpa: float | None
+    academic_status: str
+
+
+class AttendanceCard(BaseModel):
+    attendance_percentage: float
+    present: int
+    absent: int
+    total: int
+
+
+class PlacementCard(BaseModel):
     applied_drives: int
     interviews: int
     offers: int
 
 
-class FacultyDashboardResponse(BaseModel):
+class ResumeCard(BaseModel):
+    uploaded: bool
+
+
+class CertificateCard(BaseModel):
+    total: int
+    pending: int
+    verified: int
+
+
+class NotificationCard(BaseModel):
+    unread: int
+
+
+class StudentDashboardResponse(BaseModel):
+    profile: StudentProfileCard
+    academic: AcademicCard
+    attendance: AttendanceCard
+    placement: PlacementCard
+    resume: ResumeCard
+    certificates: CertificateCard
+    notifications: NotificationCard
+
+
+class FacultyProfileCard(BaseModel):
+    full_name: str
+    department: str
+
+
+class FacultySubjectCard(BaseModel):
     assigned_subjects: int
+
+
+class FacultyStudentCard(BaseModel):
     total_students: int
+
+
+class FacultyAttendanceCard(BaseModel):
     attendance_records: int
+
+
+class FacultyMarkCard(BaseModel):
     marks_uploaded: int
+
+
+class FacultyResultCard(BaseModel):
     results_published: int
 
 
+class FacultyNotificationCard(BaseModel):
+    unread: int
+
+
+class FacultyDashboardResponse(BaseModel):
+    profile: FacultyProfileCard
+    subjects: FacultySubjectCard
+    students: FacultyStudentCard
+    attendance: FacultyAttendanceCard
+    marks: FacultyMarkCard
+    results: FacultyResultCard
+    notifications: FacultyNotificationCard
+
+
+class CompanyCard(BaseModel):
+    total: int
+
+
+class DriveCard(BaseModel):
+    active: int
+
+
+class ApplicationCard(BaseModel):
+    total: int
+    selected: int
+
+
+class PackageCard(BaseModel):
+    highest: float
+    average: float
+
+
+class PlacementNotificationCard(BaseModel):
+    unread: int
+
+
 class PlacementDashboardResponse(BaseModel):
-    total_companies: int
-    active_drives: int
-    total_applications: int
-    selected_students: int
-    highest_package: float
-    average_package: float
+    companies: CompanyCard
+    drives: DriveCard
+    applications: ApplicationCard
+    packages: PackageCard
+    notifications: PlacementNotificationCard
 
 #
 

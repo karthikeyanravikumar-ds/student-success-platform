@@ -165,7 +165,7 @@ def upload_student_resume(
     student_id: UUID,
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
-    current_user=Depends(require_roles("Administrator")),
+    current_user=Depends(get_current_user),
 ):
     student = StudentResumeService.upload(
         db,
@@ -344,7 +344,7 @@ def upload_student_profile_photo(
     student_id: UUID,
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
-    current_user=Depends(require_roles("Administrator")),
+    current_user=Depends(get_current_user),
 ):
     student = StudentProfileService.upload(
         db,
@@ -411,7 +411,7 @@ def replace_student_profile_photo(
     student_id: UUID,
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
-    current_user=Depends(require_roles("Administrator")),
+    current_user=Depends(get_current_user),
 ):
     student = StudentProfileService.replace(
         db,
@@ -437,11 +437,12 @@ def replace_student_profile_photo(
 def delete_student_profile_photo(
     student_id: UUID,
     db: Session = Depends(get_db),
-    current_user=Depends(require_roles("Administrator")),
+    current_user=Depends(get_current_user),
 ):
     result = StudentProfileService.delete(
         db,
         student_id,
+        current_user,
     )
 
     if result is None:

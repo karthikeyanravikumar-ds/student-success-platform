@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
@@ -112,19 +113,63 @@ class DashboardService:
         }
 
     @staticmethod
-    def get_faculty_dashboard(db: Session):
+    def get_faculty_dashboard(
+        db: Session,
+        current_user,
+    ):
+        faculty = (
+            db.query(Faculty)
+            .filter(Faculty.user_id == current_user.id)
+            .first()
+        )
+
+        if faculty is None:
+            raise HTTPException(
+                status_code=404,
+                detail="Faculty not found",
+            )
+
+        assigned_subjects = db.query(Subject).count()
+
+        total_students = db.query(Student).count()
+
+        attendance_records = db.query(Attendance).count()
+
+        marks_uploaded = db.query(Mark).count()
+
+        results_published = db.query(Result).count()
+
+        unread_notifications = db.query(Notification).count()
 
         return {
-            "assigned_subjects": db.query(Subject).count(),
-            "total_students": db.query(Student).count(),
-            "attendance_records": db.query(Attendance).count(),
-            "marks_uploaded": db.query(Mark).count(),
-            "results_published": db.query(Result).count(),
+            "profile": {
+                "full_name": faculty.full_name,
+                "department": faculty.department.department_name,
+            },
+            "subjects": {
+                "assigned_subjects": assigned_subjects,
+            },
+            "students": {
+                "total_students": total_students,
+            },
+            "attendance": {
+                "attendance_records": attendance_records,
+            },
+            "marks": {
+                "marks_uploaded": marks_uploaded,
+            },
+            "results": {
+                "results_published": results_published,
+            },
+            "notifications": {
+                "unread": unread_notifications,
+            },
         }
 
     @staticmethod
-    def get_placement_dashboard(db: Session):
-
+    def get_placement_dashboard(
+        db: Session,
+    ):
         highest_package = (
             db.query(func.max(PlacementDrive.package)).scalar() or 0
         )
@@ -133,21 +178,52 @@ class DashboardService:
             db.query(func.avg(PlacementDrive.package)).scalar() or 0
         )
 
-        return {
-            "total_companies": db.query(Company).count(),
-            "active_drives": db.query(PlacementDrive)
+        total_companies = db.query(Company).count()
+
+        active_drives = (
+            db.query(PlacementDrive)
             .filter(
                 PlacementDrive.status == DriveStatus.OPEN
             )
-            .count(),
-            "total_applications": db.query(Application).count(),
-            "selected_students": db.query(Application)
+            .count()
+        )
+
+        total_applications = (
+            db.query(Application)
+            .count()
+        )
+
+        selected_students = (
+            db.query(Application)
             .filter(
                 Application.status == ApplicationStatus.SELECTED
             )
-            .count(),
-            "highest_package": round(highest_package, 2),
-            "average_package": round(average_package, 2),
+            .count()
+        )
+
+        unread_notifications = (
+            db.query(Notification)
+            .count()
+        )
+
+        return {
+            "companies": {
+                "total": total_companies,
+            },
+            "drives": {
+                "active": active_drives,
+            },
+            "applications": {
+                "total": total_applications,
+                "selected": selected_students,
+            },
+            "packages": {
+                "highest": round(highest_package, 2),
+                "average": round(average_package, 2),
+            },
+            "notifications": {
+                "unread": unread_notifications,
+            },
         }
 
     @staticmethod
@@ -162,14 +238,12 @@ class DashboardService:
         )
 
         if student is None:
-            return {
-                "attendance_percentage": 0,
-                "current_cgpa": 0,
-                "current_semester": 0,
-                "applied_drives": 0,
-                "interviews": 0,
-                "offers": 0,
-            }
+            from fastapi import HTTPException
+
+            raise HTTPException(
+                status_code=404,
+                detail="Student not found",
+            )
 
         latest_result = (
             db.query(Result)
@@ -184,10 +258,16 @@ class DashboardService:
             else 0
         )
 
+        latest_sgpa = (
+            latest_result.sgpa
+            if latest_result
+            else None
+        )
+
         total_attendance = (
             db.query(Attendance)
             .filter(
-                Attendance.student_id == student.id
+                Attendance.student_id == student.id,
             )
             .count()
         )
@@ -210,7 +290,7 @@ class DashboardService:
         applied_drives = (
             db.query(Application)
             .filter(
-                Application.student_id == student.id
+                Application.student_id == student.id,
             )
             .count()
         )
@@ -222,38 +302,105 @@ class DashboardService:
                 Interview.application_id == Application.id,
             )
             .filter(
-                Application.student_id == student.id
+                Application.student_id == student.id,
             )
             .count()
         )
 
         offers = (
-    db.query(Offer)
-    .join(
-        Interview,
-        Offer.interview_id == Interview.id,
-    )
-    .join(
-        Application,
-        Interview.application_id == Application.id,
-    )
-    .filter(
-        Application.student_id == student.id,
-    )
-    .count()
-)
+            db.query(Offer)
+            .join(
+                Interview,
+                Offer.interview_id == Interview.id,
+            )
+            .join(
+                Application,
+                Interview.application_id == Application.id,
+            )
+            .filter(
+                Application.student_id == student.id,
+            )
+            .count()
+        )
+
+        total_certificates = (
+            db.query(StudentCertificate)
+            .filter(
+                StudentCertificate.student_id == student.id,
+            )
+            .count()
+        )
+
+        pending_certificates = (
+            db.query(StudentCertificate)
+            .filter(
+                StudentCertificate.student_id == student.id,
+                StudentCertificate.verification_status == "Pending",
+            )
+            .count()
+        )
+
+        verified_certificates = (
+            db.query(StudentCertificate)
+            .filter(
+                StudentCertificate.student_id == student.id,
+                StudentCertificate.verification_status == "Verified",
+            )
+            .count()
+        )
+
+        unread_notifications = (
+            db.query(Notification)
+            .count()
+        )
 
         return {
+            "profile": {
+                "full_name": student.full_name,
+                "roll_no": student.roll_no,
+                "department": student.department.department_name,
+                "program": student.program.program_name,
+                "semester": student.current_semester,
+                "division": student.division,
+            },
+        "academic": {
+            "current_cgpa": round(current_cgpa, 2),
+            "current_semester": student.current_semester,
+            "latest_sgpa": latest_sgpa,
+            "academic_status": (
+                "Good Standing"
+                if current_cgpa >= 6
+                else "Academic Probation"
+            ),
+        },
+        "attendance": {
             "attendance_percentage": round(
                 attendance_percentage,
                 2,
             ),
-            "current_cgpa": round(
-                current_cgpa,
-                2,
+            "present": present_attendance,
+            "absent": (
+                total_attendance
+                - present_attendance
             ),
-            "current_semester": student.current_semester,
+            "total": total_attendance,
+        },
+        "placement": {
             "applied_drives": applied_drives,
             "interviews": interviews,
             "offers": offers,
-        }
+        },
+        "resume": {
+            "uploaded": (
+                student.resume_path is not None
+            ),
+        },
+        "certificates": {
+            "total": total_certificates,
+            "pending": pending_certificates,
+            "verified": verified_certificates,
+        },
+        "notifications": {
+            "unread": unread_notifications,
+        },
+    }
