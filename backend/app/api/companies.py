@@ -30,7 +30,8 @@ def create_company(
     request: CompanyCreate,
     db: Session = Depends(get_db),
     current_user=Depends(
-        require_roles("Administrator")
+        require_roles("Administrator",
+                      "Placement Officer")
     ),
 ):
     return CompanyService.create(
@@ -80,7 +81,8 @@ def update_company(
     request: CompanyUpdate,
     db: Session = Depends(get_db),
     current_user=Depends(
-        require_roles("Administrator")
+        require_roles("Administrator",
+                      "Placement Officer")
     ),
 ):
     company = CompanyService.update(
@@ -106,7 +108,8 @@ def delete_company(
     company_id: UUID,
     db: Session = Depends(get_db),
     current_user=Depends(
-        require_roles("Administrator")
+        require_roles("Administrator",
+                      "Placement Officer")
     ),
 ):
     deleted = CompanyService.delete(
