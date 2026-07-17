@@ -16,6 +16,26 @@ def get_current_user(
     token: str = Depends(oauth2_scheme),
     db: Session = Depends(get_db),
 ):
+    print("=" * 50)
+    print("TOKEN:", token)
+
+    payload = verify_access_token(token)
+    print("PAYLOAD:", payload)
+
+    email = payload.get("sub")
+    print("EMAIL:", email)
+
+    user = UserRepository.get_by_email(db, email)
+    print("USER:", user)
+
+    if user is None:
+        raise HTTPException(
+            status_code=401,
+            detail="User not found",
+        )
+
+    return user
+
     payload = verify_access_token(token)
 
     email = payload.get("sub")

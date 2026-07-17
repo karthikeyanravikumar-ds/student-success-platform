@@ -26,6 +26,7 @@ from app.api.uploads import router as upload_router
 from fastapi.staticfiles import StaticFiles
 from app.api.student_certificates import router as student_certificate_router
 from app.api.notifications import router as notification_router
+from fastapi.middleware.cors import CORSMiddleware
 
 
 app = FastAPI(
@@ -35,6 +36,17 @@ app = FastAPI(
 )
 register_exception_handlers(app)
 register_cors(app)
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.mount(
     "/files",

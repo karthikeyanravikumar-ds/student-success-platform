@@ -1,0 +1,52 @@
+:root {
+
+  /* ===========================
+     VSIT BRAND COLORS
+  ============================ */
+
+  --primary: #A6192E;
+  --primary-dark: #7A1022;
+  --primary-light: #C72C41;
+
+  --secondary: #FFFFFF;
+
+  /* Background */
+
+  --background: #F5F7FA;
+  --surface: #FFFFFF;
+
+  /* Text */
+
+  --text-primary: #1F2937;
+  --text-secondary: #6B7280;
+  --text-light: #9CA3AF;
+
+  /* Borders */
+
+  --border: #E5E7EB;
+
+  /* Status */
+
+  --success: #16A34A;
+  --warning: #F59E0B;
+  --danger: #DC2626;
+  --info: #2563EB;
+
+  /* Radius */
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+
+  /* Shadows */
+
+  --shadow-sm:
+    0 2px 4px rgba(0,0,0,0.05);
+
+  --shadow-md:
+    0 8px 24px rgba(0,0,0,0.08);
+
+  --shadow-lg:
+    0 16px 40px rgba(0,0,0,0.12);
+
+}
