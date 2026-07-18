@@ -1,7 +1,6 @@
 from uuid import UUID
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from app.models.student import Student
-from sqlalchemy import or_
 from app.utils.pagination import paginate
 from app.utils.search import apply_search
 from app.utils.filtering import apply_filters
@@ -21,7 +20,7 @@ class StudentRepository:
         db.refresh(student)
 
         return student
-
+    
     @staticmethod
     def get_by_user_id(
         db: Session,
@@ -29,6 +28,11 @@ class StudentRepository:
     ):
         return (
             db.query(Student)
+            .options(
+                joinedload(Student.user),
+                joinedload(Student.department),
+                joinedload(Student.program),
+            )
             .filter(Student.user_id == user_id)
             .first()
         )
@@ -121,12 +125,12 @@ class StudentRepository:
     student: Student,
     resume_path: str,
     ):
-      student.resume_path = resume_path
+                student.resume_path = resume_path
 
-      db.commit()
-      db.refresh(student)
+                db.commit()
+                db.refresh(student)
 
-      return student
+                return student
 
     @staticmethod
     def delete(
