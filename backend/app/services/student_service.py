@@ -20,14 +20,27 @@ class StudentService:
         )
 
     @staticmethod
-    def get_profile(
-        db,
-        user_id,
-    ):
-        return StudentRepository.get_by_user_id(
-            db,
-            user_id,
-        )
+    def get_profile(db, user_id):
+        student = StudentRepository.get_by_user_id(db, user_id)
+
+        if student is None:
+            return None
+
+        return {
+            "id": student.id,
+            "roll_no": student.roll_no,
+            "full_name": student.full_name,
+            "gender": student.gender,
+            "dob": student.dob,
+            "phone": student.phone,
+            "division": student.division,
+            "admission_year": student.admission_year,
+            "graduation_year": student.graduation_year,
+            "current_semester": student.current_semester,
+            "profile_photo_path": student.profile_photo_path,
+            "resume_path": student.resume_path,
+            "is_active": student.is_active,
+        }
 
     @staticmethod
     def get_all(
